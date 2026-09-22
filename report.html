@@ -1,126 +1,388 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Issue Report System</title>
-    <link rel="icon" type="image/png" href="logoweb.png">
-    <link rel="stylesheet" href="report.css">
+
+    <title>แจ้งปัญหา | Issue Report System</title>
+
+    <link rel="stylesheet" href="../css/report.css">
 </head>
+
 <body>
+
+    <!-- ==============================
+         Header
+    =============================== -->
     <header class="site-header">
+
         <div class="header-container">
+
             <a href="report.html" class="brand">
-                <img src="logo.png" alt="KFT Company Logo" width="150">
+
+                <img
+                    src="../images/logo.png"
+                    alt="KFT Company Logo"
+                    class="company-logo"
+                >
+
                 <div class="brand-text">
                     <h1>Issue Report System</h1>
-                    <p>ระบบแจ้งปัญหาภายในองค์กร</p>
+
+                    <p>
+                        ระบบแจ้งปัญหาภายในองค์กร
+                    </p>
                 </div>
+
             </a>
-            <button type="button" id="logoutButton" class="logout-button">
-                <span aria-hidden="true">↪</span>
+
+            <button
+                type="button"
+                class="logout-button"
+                onclick="logout()"
+            >
                 ออกจากระบบ
             </button>
+
         </div>
+
     </header>
 
+
+    <!-- ==============================
+         Main
+    =============================== -->
     <main class="main-container">
-        <section class="user-info-card">
-            <div>
-                <span class="info-label">ผู้ใช้งาน</span>
-                <strong id="currentUsername">-</strong>
+
+
+        <!-- ==============================
+             User Information
+        =============================== -->
+        <section class="user-card">
+
+            <div class="user-info">
+
+                <span class="info-label">
+                    ผู้ใช้งาน
+                </span>
+
+                <strong
+                    id="currentUser"
+                    class="info-value"
+                >
+                    -
+                </strong>
+
             </div>
-            <div>
-                <span class="info-label">แผนก</span>
-                <strong id="currentDepartment">-</strong>
+
+
+            <div class="user-info">
+
+                <span class="info-label">
+                    แผนก
+                </span>
+
+                <strong
+                    id="currentDepartment"
+                    class="info-value"
+                >
+                    -
+                </strong>
+
             </div>
+
         </section>
 
+
+        <!-- ==============================
+             Report Form
+        =============================== -->
         <section class="report-card">
-            <div class="report-card-header">
-                <h2>แจ้งปัญหา</h2>
-                <p>กรุณากรอกรายละเอียดของปัญหาที่พบ</p>
+
+            <div class="report-header">
+
+                <h2>
+                    แจ้งปัญหา
+                </h2>
+
+                <p>
+                    กรุณากรอกรายละเอียดของปัญหาที่พบ
+                </p>
+
             </div>
 
-            <div id="successMessage" class="message success-message" role="alert" hidden>ส่งแจ้งปัญหาสำเร็จ</div>
-            <div id="errorMessage" class="message error-message" role="alert" hidden>ไม่สามารถส่งแจ้งปัญหาได้</div>
 
-            <form id="reportForm" class="report-form" novalidate>
+            <!-- Error Message -->
+            <div
+                id="errorMessage"
+                class="message error-message"
+                style="display:none;"
+            ></div>
+
+
+            <!-- Success Message -->
+            <div
+                id="successMessage"
+                class="message success-message"
+                style="display:none;"
+            ></div>
+
+
+            <!-- ==============================
+                 Form
+            =============================== -->
+            <form
+                id="reportForm"
+                novalidate
+            >
+
+
+                <!-- ==============================
+                     Subject
+                =============================== -->
                 <div class="form-group">
-                    <label for="category" class="form-label">ประเภทปัญหา <span class="required">*</span></label>
-                    <select id="category" name="category" class="form-control" required>
-                        <option value="" selected disabled>-- เลือกประเภทปัญหา --</option>
-                        <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
-                        <option value="Serverเข้าไม่ได้">Serverเข้าไม่ได้</option>
-                        <option value="เครื่องพิมพ์">เครื่องพิมพ์</option>
-                        <option value="โปรแกรม">โปรแกรม</option>
-                        <option value="ระบบอินเทอร์เน็ต">ระบบอินเทอร์เน็ต</option>
-                        <option value="อุปกรณ์สำนักงาน">อุปกรณ์สำนักงาน</option>
-                        <option value="tablet/IPAD">tablet/IPAD</option>
-                        <option value="CCTV">CCTV</option>
-                        <option value="อื่น ๆ">อื่น ๆ</option>
+
+                    <label for="subject">
+                        หัวข้อปัญหา
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        placeholder="เช่น เครื่องพิมพ์ใช้งานไม่ได้"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- ==============================
+                     Problem Type
+                =============================== -->
+                <div class="form-group">
+
+                    <label for="problemType">
+                        ประเภทปัญหา
+                        <span class="required">*</span>
+                    </label>
+
+                    <select
+                        id="problemType"
+                        name="problemType"
+                        required
+                    >
+
+                        <option value="">
+                            -- เลือกประเภทปัญหา --
+                        </option>
+
+                        <option value="คอมพิวเตอร์">
+                            คอมพิวเตอร์
+                        </option>
+
+                        <option value="เครื่องพิมพ์">
+                            เครื่องพิมพ์
+                        </option>
+
+                        <option value="ระบบเครือข่าย">
+                            ระบบเครือข่าย
+                        </option>
+
+                        <option value="โปรแกรม">
+                            โปรแกรม
+                        </option>
+
+                        <option value="ระบบสารสนเทศ">
+                            ระบบสารสนเทศ
+                        </option>
+
+                        <option value="อุปกรณ์สำนักงาน">
+                            อุปกรณ์สำนักงาน
+                        </option>
+
+                        <option value="อื่นๆ">
+                            อื่นๆ
+                        </option>
+
                     </select>
+
                 </div>
 
+
+                <!-- ==============================
+                     Description
+                =============================== -->
                 <div class="form-group">
-                    <label for="description" class="form-label">รายละเอียดปัญหา <span class="required">*</span></label>
-                    <textarea id="description" name="description" class="form-control textarea-control" placeholder="อธิบายอาการหรือปัญหาที่พบ..." rows="6" maxlength="2000" required></textarea>
+
+                    <label for="description">
+                        รายละเอียดปัญหา
+                        <span class="required">*</span>
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="6"
+                        placeholder="กรุณาอธิบายอาการหรือปัญหาที่พบ"
+                        required
+                    ></textarea>
+
                 </div>
 
+
+                <!-- ==============================
+                     Location
+                =============================== -->
                 <div class="form-group">
-                    <label for="assetNumber" class="form-label">หมายเลขทรัพย์สิน / รหัสเครื่อง <span class="optional">(ถ้ามี)</span></label>
-                    <input type="text" id="assetNumber" name="assetNumber" class="form-control" placeholder="เช่น KFT-PC-001" maxlength="100">
+
+                    <label for="location">
+                        สถานที่ / จุดที่พบปัญหา
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="เช่น ห้อง GAD, Production 1"
+                        required
+                    >
+
                 </div>
 
+
+                <!-- ==============================
+                     Asset Number
+                =============================== -->
                 <div class="form-group">
-                    <label for="image" class="form-label">รูปภาพประกอบ <span class="optional">(ถ้ามี)</span></label>
-                    <input type="file" id="image" name="image" class="form-control file-control" accept="image/*">
-                    <small class="form-help">รองรับไฟล์รูปภาพ เช่น JPG, PNG และ WEBP</small>
+
+                    <label for="assetNumber">
+                        หมายเลขทรัพย์สิน / รหัสเครื่อง
+                        <span class="optional">
+                            (ถ้ามี)
+                        </span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="assetNumber"
+                        name="assetNumber"
+                        placeholder="เช่น KFT-PC-001"
+                    >
+
                 </div>
 
+
+                <!-- ==============================
+                     Image
+                =============================== -->
+                <div class="form-group">
+
+                    <label for="image">
+                        รูปภาพประกอบ
+                        <span class="optional">
+                            (ถ้ามี)
+                        </span>
+                    </label>
+
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept="image/jpeg,image/png,image/webp"
+                    >
+
+                    <small class="help-text">
+                        รองรับไฟล์รูปภาพ เช่น JPG, PNG และ WEBP
+                    </small>
+
+                </div>
+
+
+                <!-- ==============================
+                     Buttons
+                =============================== -->
                 <div class="form-actions">
-                    <button type="submit" id="submitButton" class="submit-button"><span aria-hidden="true">➤</span> ส่งแจ้งปัญหา</button>
-                    <button type="reset" id="resetButton" class="reset-button">ล้างข้อมูล</button>
+
+                    <button
+                        type="submit"
+                        id="submitButton"
+                        class="submit-button"
+                    >
+                        <span id="submitText">
+                            ➤ &nbsp; ส่งแจ้งปัญหา
+                        </span>
+                    </button>
+
+
+                    <button
+                        type="reset"
+                        id="resetButton"
+                        class="reset-button"
+                    >
+                        ล้างข้อมูล
+                    </button>
+
                 </div>
+
             </form>
+
         </section>
+
     </main>
 
-    <footer class="site-footer">
-        <p>Creative by Chanathip Ruangphueng • KFT Issue Report System</p>
-    </footer>
 
-    <script src="auth.js"></script>
+    <!-- ==============================
+         JavaScript
+    =============================== -->
+
+    <script src="../js/auth.js"></script>
+
     <script>
-        if (typeof checkLogin === "function") {
-            checkLogin();
-        } else {
-            console.error("ไม่พบฟังก์ชัน checkLogin() จาก auth.js");
-        }
+        /*
+         * ตรวจสอบ Login
+         */
+        checkLogin();
 
+
+        /*
+         * แสดงข้อมูลผู้ใช้งาน
+         */
         document.addEventListener("DOMContentLoaded", function () {
-            const user = typeof getCurrentUser === "function" ? getCurrentUser() : null;
-            const currentUsername = document.getElementById("currentUsername");
-            const currentDepartment = document.getElementById("currentDepartment");
-            const logoutButton = document.getElementById("logoutButton");
 
-            if (user) {
-                if (currentUsername) currentUsername.textContent = user.username || "-";
-                if (currentDepartment) currentDepartment.textContent = user.department || "-";
+            const user = getCurrentUser();
+
+            if (!user) {
+                return;
             }
 
-            if (logoutButton) {
-                logoutButton.addEventListener("click", function () {
-                    if (typeof logout === "function") {
-                        logout();
-                    } else {
-                        sessionStorage.clear();
-                        window.location.href = "index.html";
-                    }
-                });
+            const userElement =
+                document.getElementById("currentUser");
+
+            const departmentElement =
+                document.getElementById("currentDepartment");
+
+
+            if (userElement) {
+                userElement.textContent =
+                    user.username || "-";
             }
+
+
+            if (departmentElement) {
+                departmentElement.textContent =
+                    user.department || "-";
+            }
+
         });
     </script>
-    <script src="report.js"></script>
+
+
+    <script src="../js/report.js"></script>
+
 </body>
+
 </html>
