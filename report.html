@@ -8,9 +8,7 @@
 
     <title>แจ้งปัญหา | Issue Report System</title>
 
-    <!-- สำคัญมาก:
-         report.html อยู่ใน pages/
-         ดังนั้นต้องใช้ ../ เพื่อย้อนกลับไปโฟลเดอร์หลัก -->
+    <!-- สำคัญ: report.html อยู่ใน pages จึงต้องใช้ ../ -->
     <link rel="stylesheet" href="../css/report.css">
     <link rel="stylesheet" href="../css/logout.css">
 </head>
@@ -26,7 +24,6 @@
 
             <a href="report.html" class="brand">
 
-                <!-- รูปอยู่ที่ images/logo.png -->
                 <img
                     src="../images/logo.png"
                     alt="KFT Company Logo"
@@ -34,19 +31,29 @@
                 >
 
                 <div class="brand-text">
+
                     <h1>Issue Report System</h1>
-                    <p>ระบบแจ้งปัญหาภายในองค์กร</p>
+
+                    <p>
+                        ระบบแจ้งปัญหาภายในองค์กร
+                    </p>
+
                 </div>
 
             </a>
 
-            <button
-                type="button"
-                id="logoutButton"
-                class="logout-button"
-            >
-                ออกจากระบบ
-            </button>
+            <div class="header-right">
+
+                <button
+                    type="button"
+                    id="logoutButton"
+                    class="logout-button"
+                    onclick="logout()"
+                >
+                    ออกจากระบบ
+                </button>
+
+            </div>
 
         </div>
 
@@ -54,47 +61,47 @@
 
 
     <!-- =========================
-         Main
+         User Information
     ========================== -->
-    <main class="page-container">
+    <section class="user-info-section">
 
+        <div class="user-info-card">
 
-        <!-- =========================
-             User Information
-        ========================== -->
-        <section class="user-card">
+            <div class="user-info-item">
 
-            <div class="user-info">
+                <span class="info-label">
+                    ผู้ใช้งาน
+                </span>
 
-                <div class="info-item">
-                    <span class="info-label">
-                        ผู้ใช้งาน
-                    </span>
-
-                    <strong id="currentUser">
-                        -
-                    </strong>
-                </div>
-
-
-                <div class="info-item">
-                    <span class="info-label">
-                        แผนก
-                    </span>
-
-                    <strong id="currentDepartment">
-                        -
-                    </strong>
-                </div>
+                <strong id="currentUser">
+                    -
+                </strong>
 
             </div>
 
-        </section>
+
+            <div class="user-info-item">
+
+                <span class="info-label">
+                    แผนก
+                </span>
+
+                <strong id="currentDepartment">
+                    -
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
 
 
-        <!-- =========================
-             Report Form
-        ========================== -->
+    <!-- =========================
+         Main
+    ========================== -->
+    <main class="main-container">
+
         <section class="report-card">
 
             <div class="report-header">
@@ -110,28 +117,25 @@
             </div>
 
 
-            <!-- Error Message -->
+            <!-- =========================
+                 Message
+            ========================== -->
             <div
-                id="errorMessage"
-                class="message error-message"
-                style="display:none;"
-            ></div>
-
-
-            <!-- Success Message -->
-            <div
-                id="successMessage"
-                class="message success-message"
+                id="message"
+                class="message"
                 style="display:none;"
             ></div>
 
 
             <!-- =========================
-                 Form
+                 Report Form
             ========================== -->
-            <form id="reportForm">
+            <form
+                id="reportForm"
+                enctype="multipart/form-data"
+            >
 
-                <!-- หัวข้อ -->
+                <!-- หัวข้อปัญหา -->
                 <div class="form-group">
 
                     <label for="subject">
@@ -184,16 +188,12 @@
                             โปรแกรม
                         </option>
 
-                        <option value="ระบบอินเทอร์เน็ต">
-                            ระบบอินเทอร์เน็ต
-                        </option>
-
                         <option value="อุปกรณ์สำนักงาน">
                             อุปกรณ์สำนักงาน
                         </option>
 
-                        <option value="อื่น ๆ">
-                            อื่น ๆ
+                        <option value="อื่นๆ">
+                            อื่นๆ
                         </option>
 
                     </select>
@@ -239,7 +239,7 @@
                 </div>
 
 
-                <!-- Asset -->
+                <!-- รหัสเครื่อง -->
                 <div class="form-group">
 
                     <label for="assetNumber">
@@ -273,12 +273,28 @@
                         type="file"
                         id="image"
                         name="image"
-                        accept="image/jpeg,image/png,image/webp"
+                        accept="image/png,image/jpeg,image/webp"
                     >
 
-                    <small class="help-text">
-                        รองรับไฟล์รูปภาพ เช่น JPG, PNG และ WEBP
+                    <small class="file-help">
+                        รองรับไฟล์ JPG, PNG และ WEBP
                     </small>
+
+                </div>
+
+
+                <!-- Preview รูป -->
+                <div
+                    id="imagePreviewContainer"
+                    class="image-preview-container"
+                    style="display:none;"
+                >
+
+                    <img
+                        id="imagePreview"
+                        class="image-preview"
+                        alt="ตัวอย่างรูปภาพ"
+                    >
 
                 </div>
 
@@ -291,11 +307,8 @@
                         id="submitButton"
                         class="submit-button"
                     >
-                        <span id="submitButtonText">
-                            ➤ &nbsp;ส่งแจ้งปัญหา
-                        </span>
+                        ส่งแจ้งปัญหา
                     </button>
-
 
                     <button
                         type="reset"
@@ -315,27 +328,154 @@
 
 
     <!-- =========================
+         Footer
+    ========================== -->
+    <footer class="site-footer">
+
+        <p>
+            IT Support • Kotobukiya Feltol (Thailand) Co.,Ltd
+        </p>
+
+    </footer>
+
+
+    <!-- =========================
          JavaScript
     ========================== -->
 
-    <!-- ต้องอยู่ก่อน report.js -->
     <script src="../js/auth.js"></script>
 
     <script>
-        /*
-         * ตรวจสอบ Login
-         */
         document.addEventListener("DOMContentLoaded", function () {
 
             if (typeof checkLogin === "function") {
                 checkLogin();
             }
 
+            if (typeof getCurrentUser === "function") {
+
+                const user = getCurrentUser();
+
+                if (user) {
+
+                    const usernameElement =
+                        document.getElementById("currentUser");
+
+                    const departmentElement =
+                        document.getElementById("currentDepartment");
+
+
+                    if (usernameElement) {
+                        usernameElement.textContent =
+                            user.username ||
+                            user.user ||
+                            "-";
+                    }
+
+
+                    if (departmentElement) {
+                        departmentElement.textContent =
+                            user.department ||
+                            "-";
+                    }
+
+                }
+
+            }
+
         });
     </script>
 
-    <!-- Report JavaScript -->
+
     <script src="../js/report.js"></script>
+
+
+    <!-- Preview รูปภาพ -->
+    <script>
+
+        const imageInput =
+            document.getElementById("image");
+
+        const imagePreview =
+            document.getElementById("imagePreview");
+
+        const imagePreviewContainer =
+            document.getElementById("imagePreviewContainer");
+
+
+        if (imageInput) {
+
+            imageInput.addEventListener("change", function () {
+
+                const file = this.files[0];
+
+                if (!file) {
+
+                    imagePreviewContainer.style.display = "none";
+
+                    imagePreview.src = "";
+
+                    return;
+                }
+
+
+                if (!file.type.startsWith("image/")) {
+
+                    imagePreviewContainer.style.display = "none";
+
+                    imagePreview.src = "";
+
+                    return;
+                }
+
+
+                const reader = new FileReader();
+
+
+                reader.onload = function (event) {
+
+                    imagePreview.src =
+                        event.target.result;
+
+                    imagePreviewContainer.style.display =
+                        "block";
+
+                };
+
+
+                reader.readAsDataURL(file);
+
+            });
+
+        }
+
+
+        const reportForm =
+            document.getElementById("reportForm");
+
+
+        if (reportForm) {
+
+            reportForm.addEventListener("reset", function () {
+
+                setTimeout(function () {
+
+                    if (imagePreviewContainer) {
+                        imagePreviewContainer.style.display =
+                            "none";
+                    }
+
+                    if (imagePreview) {
+                        imagePreview.src = "";
+                    }
+
+                }, 0);
+
+            });
+
+        }
+
+    </script>
 
 </body>
 
