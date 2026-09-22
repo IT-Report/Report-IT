@@ -180,9 +180,6 @@ async function handleReportSubmit(event) {
      * อ่านข้อมูลจาก Form
      *************************************************/
 
-    const department =
-        getValue("department");
-
 
     const category =
         getValue("category");
