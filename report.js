@@ -185,16 +185,10 @@ async function handleReportSubmit(event) {
         getValue("category");
 
 
-    const subject =
-        getValue("subject");
-
 
     const description =
         getValue("description");
 
-
-    const location =
-        getValue("location");
 
 
     const imageInput =
@@ -212,18 +206,6 @@ async function handleReportSubmit(event) {
         );
 
         focusElement("category");
-
-        return;
-    }
-
-
-    if (!subject) {
-
-        showError(
-            "กรุณากรอกหัวข้อปัญหา"
-        );
-
-        focusElement("subject");
 
         return;
     }
