@@ -205,18 +205,6 @@ async function handleReportSubmit(event) {
      * ตรวจสอบข้อมูล
      *************************************************/
 
-    if (!department) {
-
-        showError(
-            "กรุณาเลือกแผนก"
-        );
-
-        focusElement("department");
-
-        return;
-    }
-
-
     if (!category) {
 
         showError(
