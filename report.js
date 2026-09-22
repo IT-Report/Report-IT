@@ -1,5 +1,11 @@
 /*************************************************
  * ISSUE REPORT SYSTEM - report.js
+ * Version: Fixed
+ *************************************************/
+
+
+/*************************************************
+ * GOOGLE APPS SCRIPT API
  *************************************************/
 
 const API_URL =
@@ -18,74 +24,80 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutButton =
         document.getElementById("logoutButton");
 
-    const resetButton =
-        document.getElementById("resetButton");
-
 
     /*
      * ตรวจสอบ Login
      */
+
     if (typeof checkLogin === "function") {
-        checkLogin();
+
+        const loginOK = checkLogin();
+
+        if (!loginOK) {
+            return;
+        }
+
     }
 
 
     /*
-     * ตรวจสอบ Form
+     * ตรวจสอบว่ามี Form หรือไม่
      */
+
     if (!reportForm) {
-        console.error("ไม่พบ element id='reportForm'");
+
+        console.error(
+            "ไม่พบ form id='reportForm'"
+        );
+
         return;
     }
 
 
     /*
-     * ปุ่มออกจากระบบ
+     * Logout
      */
+
     if (logoutButton) {
 
-        logoutButton.addEventListener("click", function () {
+        logoutButton.addEventListener(
+            "click",
+            function () {
 
-            if (typeof logout === "function") {
-                logout();
-            } else {
-                sessionStorage.clear();
-                window.location.href = "../index.html";
+                if (typeof logout === "function") {
+
+                    logout();
+
+                } else {
+
+                    sessionStorage.clear();
+
+                    window.location.href =
+                        "../index.html";
+
+                }
+
             }
-
-        });
-
-    }
-
-
-    /*
-     * ปุ่มล้างข้อมูล
-     */
-    if (resetButton) {
-
-        resetButton.addEventListener("click", function () {
-
-            reportForm.reset();
-            hideMessages();
-
-        });
+        );
 
     }
 
 
     /*
-     * เมื่อกดส่ง Form
+     * Submit Form
      */
+
     reportForm.addEventListener(
         "submit",
         handleReportSubmit
     );
 
+
 });
 
 
 /*************************************************
- * จัดการการส่งข้อมูล
+ * HANDLE SUBMIT
  *************************************************/
 
 async function handleReportSubmit(event) {
@@ -98,26 +110,63 @@ async function handleReportSubmit(event) {
         document.getElementById("reportForm");
 
     const submitButton =
-        document.getElementById("submitButton");
+        document.getElementById(
+            "submitReportButton"
+        );
 
 
     if (!reportForm) {
-        showError("ไม่พบแบบฟอร์มแจ้งปัญหา");
+
+        showError(
+            "ไม่พบแบบฟอร์มแจ้งปัญหา"
+        );
+
         return;
     }
 
 
-    /*
+    /*************************************************
      * ตรวจสอบผู้ใช้งาน
-     */
+     *************************************************/
+
     let currentUser = null;
 
-    if (typeof getCurrentUser === "function") {
-        currentUser = getCurrentUser();
+
+    if (
+        typeof getCurrentUser === "function"
+    ) {
+
+        currentUser =
+            getCurrentUser();
+
+    } else {
+
+        currentUser = {
+
+            username:
+                sessionStorage.getItem(
+                    "username"
+                ),
+
+            department:
+                sessionStorage.getItem(
+                    "department"
+                ),
+
+            role:
+                sessionStorage.getItem(
+                    "role"
+                )
+
+        };
+
     }
 
 
-    if (!currentUser) {
+    if (
+        !currentUser ||
+        !currentUser.username
+    ) {
 
         showError(
             "ไม่พบข้อมูลผู้ใช้งาน กรุณาเข้าสู่ระบบใหม่"
@@ -127,31 +176,69 @@ async function handleReportSubmit(event) {
     }
 
 
-    /*
-     * อ่านค่าจาก Form
-     */
-    
+    /*************************************************
+     * อ่านข้อมูลจาก Form
+     *************************************************/
+
+    const department =
+        getValue("department");
+
+
     const category =
         getValue("category");
+
+
+    const subject =
+        getValue("subject");
+
 
     const description =
         getValue("description");
 
-    const assetNumber =
-        getValue("assetNumber");
+
+    const location =
+        getValue("location");
+
 
     const imageInput =
         document.getElementById("image");
 
 
-    /*
-     * ตรวจสอบข้อมูลที่จำเป็น
-     */
-    
+    /*************************************************
+     * ตรวจสอบข้อมูล
+     *************************************************/
+
+    if (!department) {
+
+        showError(
+            "กรุณาเลือกแผนก"
+        );
+
+        focusElement("department");
+
+        return;
+    }
+
+
     if (!category) {
 
-        showError("กรุณาเลือกประเภทปัญหา");
+        showError(
+            "กรุณาเลือกประเภทปัญหา"
+        );
+
         focusElement("category");
+
+        return;
+    }
+
+
+    if (!subject) {
+
+        showError(
+            "กรุณากรอกหัวข้อปัญหา"
+        );
+
+        focusElement("subject");
 
         return;
     }
@@ -159,138 +246,20 @@ async function handleReportSubmit(event) {
 
     if (!description) {
 
-        showError("กรุณากรอกรายละเอียดปัญหา");
+        showError(
+            "กรุณากรอกรายละเอียดปัญหา"
+        );
+
         focusElement("description");
 
         return;
     }
-    
-    /*
-     * อ่านรูปภาพ
-     */
-    let imageBase64 = "";
-
-    if (
-        imageInput &&
-        imageInput.files &&
-        imageInput.files.length > 0
-    ) {
-
-        const imageFile =
-            imageInput.files[0];
 
 
-        /*
-         * จำกัดขนาดไฟล์ไม่เกิน 5 MB
-         */
-        const maxFileSize =
-            5 * 1024 * 1024;
-
-
-        if (imageFile.size > maxFileSize) {
-
-            showError(
-                "รูปภาพต้องมีขนาดไม่เกิน 5 MB"
-            );
-
-            return;
-        }
-
-
-        /*
-         * ตรวจสอบประเภทไฟล์
-         */
-        if (
-            !imageFile.type ||
-            !imageFile.type.startsWith("image/")
-        ) {
-
-            showError(
-                "กรุณาเลือกไฟล์รูปภาพเท่านั้น"
-            );
-
-            return;
-        }
-
-
-        try {
-
-            imageBase64 =
-                await convertFileToBase64(
-                    imageFile
-                );
-
-        } catch (error) {
-
-            console.error(
-                "อ่านรูปภาพไม่สำเร็จ:",
-                error
-            );
-
-            showError(
-                "ไม่สามารถอ่านรูปภาพได้"
-            );
-
-            return;
-        }
-
-    }
-
-
-    /*
-     * สร้าง Ticket
-     */
-    const ticket =
-        createTicketNumber();
-
-
-    /*
-     * สร้าง Payload
-     */
-    const payload = {
-
-        action: "createIssue",
-
-        ticket: ticket,
-
-        dateTime:
-            const now = new Date();
-
-        dateTime:
-            new Date().toISOString(),
-
-        user:
-            currentUser.username ||
-            currentUser.user ||
-            "",
-
-        department:
-            currentUser.department ||
-            "",
-
-
-        category:
-            category,
-
-        description:
-            description,
-
-
-        assetNumber:
-            assetNumber,
-
-        status:
-            "รอดำเนินการ",
-
-        image:
-            imageBase64
-
-    };
-
-
-    /*
+    /*************************************************
      * ป้องกันกดส่งซ้ำ
-     */
+     *************************************************/
+
     if (submitButton) {
 
         submitButton.disabled = true;
@@ -309,9 +278,212 @@ async function handleReportSubmit(event) {
 
     try {
 
-        /*
+        /*************************************************
+         * อ่านรูปภาพ
+         *************************************************/
+
+        let imageBase64 = "";
+
+
+        if (
+            imageInput &&
+            imageInput.files &&
+            imageInput.files.length > 0
+        ) {
+
+            const imageFile =
+                imageInput.files[0];
+
+
+            /*
+             * จำกัด 5 MB
+             */
+
+            const maxFileSize =
+                5 * 1024 * 1024;
+
+
+            if (
+                imageFile.size >
+                maxFileSize
+            ) {
+
+                throw new Error(
+                    "รูปภาพต้องมีขนาดไม่เกิน 5 MB"
+                );
+
+            }
+
+
+            /*
+             * ตรวจสอบประเภทไฟล์
+             */
+
+            if (
+                !imageFile.type ||
+                !imageFile.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                throw new Error(
+                    "กรุณาเลือกไฟล์รูปภาพเท่านั้น"
+                );
+
+            }
+
+
+            imageBase64 =
+                await convertFileToBase64(
+                    imageFile
+                );
+
+        }
+
+
+        /*************************************************
+         * สร้าง Ticket
+         *************************************************/
+
+        const ticket =
+            createTicketNumber();
+
+
+        /*************************************************
+         * สร้างเวลาแบบประเทศไทย
+         *
+         * ใช้เวลาจากเครื่องผู้ใช้
+         * และไม่ใช้ toISOString()
+         * เพราะ toISOString() จะเป็น UTC
+         *************************************************/
+
+        const now =
+            new Date();
+
+
+        const dateTime =
+            now.getFullYear() +
+            "-" +
+            String(
+                now.getMonth() + 1
+            ).padStart(2, "0") +
+            "-" +
+            String(
+                now.getDate()
+            ).padStart(2, "0") +
+            " " +
+            String(
+                now.getHours()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                now.getMinutes()
+            ).padStart(2, "0") +
+            ":" +
+            String(
+                now.getSeconds()
+            ).padStart(2, "0");
+
+
+        /*************************************************
+         * Payload
+         *************************************************/
+
+        const payload = {
+
+            action:
+                "createIssue",
+
+
+            ticket:
+                ticket,
+
+
+            dateTime:
+                dateTime,
+
+
+            user:
+                currentUser.username ||
+                "",
+
+
+            department:
+                department ||
+                currentUser.department ||
+                "",
+
+
+            /*
+             * ประเภทปัญหา
+             */
+
+            category:
+                category,
+
+
+            /*
+             * หัวข้อปัญหา
+             */
+
+            subject:
+                subject,
+
+
+            /*
+             * รายละเอียด
+             */
+
+            description:
+                description,
+
+
+            /*
+             * สถานที่ / จุดที่พบปัญหา
+             */
+
+            location:
+                location,
+
+
+            /*
+             * ส่ง location เป็น assetNumber
+             * ด้วย เพื่อให้ Apps Script รุ่นปัจจุบัน
+             * สามารถบันทึกได้ด้วย
+             */
+
+            assetNumber:
+                location,
+
+
+            /*
+             * สถานะเริ่มต้น
+             */
+
+            status:
+                "รอดำเนินการ",
+
+
+            /*
+             * รูปภาพ Base64
+             */
+
+            image:
+                imageBase64
+
+        };
+
+
+        console.log(
+            "กำลังส่ง Payload:",
+            payload
+        );
+
+
+        /*************************************************
          * ส่งไป Google Apps Script
-         */
+         *************************************************/
+
         const result =
             await postToGoogleAppsScript(
                 payload
@@ -319,33 +491,68 @@ async function handleReportSubmit(event) {
 
 
         console.log(
-            "ผลลัพธ์การส่งข้อมูล:",
+            "ผลลัพธ์:",
             result
         );
 
 
-        /*
-         * ถือว่าส่งสำเร็จเมื่อ Apps Script
-         * ตอบกลับผ่าน iframe
-         */
+        /*************************************************
+         * ตรวจสอบผลลัพธ์
+         *************************************************/
+
         if (
             result &&
             result.success === true
         ) {
 
             showSuccess(
-                "ส่งแจ้งปัญหาสำเร็จ เลขที่ Ticket: " +
+
+                "ส่งแจ้งปัญหาสำเร็จ\n" +
+                "เลขที่ Ticket: " +
                 ticket
+
             );
 
+
+            /*
+             * ล้างข้อมูล Form
+             */
+
             reportForm.reset();
+
+
+            /*
+             * ใส่แผนกของ User กลับเข้าไป
+             */
+
+            const departmentSelect =
+                document.getElementById(
+                    "department"
+                );
+
+
+            if (
+                departmentSelect &&
+                currentUser.department
+            ) {
+
+                departmentSelect.value =
+                    currentUser.department;
+
+            }
+
 
         } else {
 
             showError(
-                result && result.message
+
+                result &&
+                result.message
+
                     ? result.message
+
                     : "ไม่สามารถส่งข้อมูลได้"
+
             );
 
         }
@@ -354,21 +561,34 @@ async function handleReportSubmit(event) {
     } catch (error) {
 
         console.error(
-            "ส่งข้อมูลไม่สำเร็จ:",
+            "Submit Error:",
             error
         );
 
+
         showError(
-            error.message ||
-            "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+
+            error &&
+            error.message
+
+                ? error.message
+
+                : "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
+
         );
 
 
     } finally {
 
+        /*
+         * เปิดปุ่มกลับ
+         */
+
         if (submitButton) {
 
-            submitButton.disabled = false;
+            submitButton.disabled =
+                false;
+
 
             submitButton.innerHTML =
                 submitButton.dataset.originalText ||
@@ -382,267 +602,347 @@ async function handleReportSubmit(event) {
 
 
 /*************************************************
- * ส่งข้อมูลด้วย Hidden Iframe
+ * ส่งข้อมูลไป Google Apps Script
  *
- * วิธีนี้ใช้ได้กับ Google Apps Script
- * โดยไม่ติดปัญหา CORS แบบ fetch
+ * ใช้ Hidden Iframe
+ * เพื่อหลีกเลี่ยง CORS
  *************************************************/
 
 function postToGoogleAppsScript(payload) {
 
-    return new Promise(function (resolve, reject) {
-
-        const iframeName =
-            "issueReportFrame_" +
-            Date.now() +
-            "_" +
-            Math.floor(
-                Math.random() * 100000
-            );
+    return new Promise(
+        function (resolve, reject) {
 
 
-        const iframe =
-            document.createElement("iframe");
-
-        iframe.name =
-            iframeName;
-
-        iframe.id =
-            iframeName;
-
-        iframe.style.display =
-            "none";
+            const iframeName =
+                "issueReportFrame_" +
+                Date.now();
 
 
-        document.body.appendChild(
-            iframe
-        );
+            /*************************************************
+             * สร้าง Iframe
+             *************************************************/
 
-
-        const form =
-            document.createElement("form");
-
-        form.method =
-            "POST";
-
-        form.action =
-            API_URL;
-
-        form.target =
-            iframeName;
-
-        form.style.display =
-            "none";
-
-
-        const input =
-            document.createElement("input");
-
-        input.type =
-            "hidden";
-
-        input.name =
-            "payload";
-
-        input.value =
-            JSON.stringify(payload);
-
-
-        form.appendChild(
-            input
-        );
-
-        document.body.appendChild(
-            form
-        );
-
-
-        let completed =
-            false;
-
-
-        let timeoutId;
-
-
-        function cleanup() {
-
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-
-            setTimeout(function () {
-
-                if (form.parentNode) {
-                    form.parentNode.removeChild(form);
-                }
-
-                if (iframe.parentNode) {
-                    iframe.parentNode.removeChild(iframe);
-                }
-
-            }, 500);
-
-        }
-
-
-        function completeSuccess() {
-
-            if (completed) {
-                return;
-            }
-
-            completed =
-                true;
-
-            cleanup();
-
-
-            resolve({
-
-                success: true,
-
-                message:
-                    "ส่งข้อมูลไปยัง Google Apps Script แล้ว"
-
-            });
-
-        }
-
-
-        function completeError(message) {
-
-            if (completed) {
-                return;
-            }
-
-            completed =
-                true;
-
-            cleanup();
-
-
-            reject(
-                new Error(message)
-            );
-
-        }
-
-
-        /*
-         * เมื่อ Apps Script ตอบกลับ
-         */
-        iframe.addEventListener(
-            "load",
-            function () {
-
-                /*
-                 * รอเล็กน้อยเพื่อให้ Apps Script
-                 * บันทึกข้อมูลลง Google Sheet เสร็จ
-                 */
-                setTimeout(function () {
-
-                    completeSuccess();
-
-                }, 1200);
-
-            },
-            {
-                once: true
-            }
-        );
-
-
-        /*
-         * ป้องกันค้างไม่สิ้นสุด
-         */
-        timeoutId =
-            setTimeout(function () {
-
-                completeError(
-                    "หมดเวลารอการตอบกลับจาก Google Apps Script"
+            const iframe =
+                document.createElement(
+                    "iframe"
                 );
 
-            }, 30000);
+
+            iframe.name =
+                iframeName;
 
 
-        /*
-         * เริ่มส่งข้อมูล
-         */
-        try {
+            iframe.id =
+                iframeName;
 
-            form.submit();
 
-        } catch (error) {
+            iframe.style.display =
+                "none";
 
-            completeError(
-                "ไม่สามารถส่งข้อมูลไปยังระบบได้"
+
+            document.body.appendChild(
+                iframe
             );
 
-        }
 
-    });
+            /*************************************************
+             * สร้าง Form
+             *************************************************/
+
+            const form =
+                document.createElement(
+                    "form"
+                );
+
+
+            form.method =
+                "POST";
+
+
+            form.action =
+                API_URL;
+
+
+            form.target =
+                iframeName;
+
+
+            form.style.display =
+                "none";
+
+
+            /*************************************************
+             * สร้าง Payload Input
+             *************************************************/
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+
+            input.type =
+                "hidden";
+
+
+            input.name =
+                "payload";
+
+
+            input.value =
+                JSON.stringify(
+                    payload
+                );
+
+
+            form.appendChild(
+                input
+            );
+
+
+            document.body.appendChild(
+                form
+            );
+
+
+            let completed =
+                false;
+
+
+            let timeoutId =
+                null;
+
+
+            /*************************************************
+             * Cleanup
+             *************************************************/
+
+            function cleanup() {
+
+                if (timeoutId) {
+
+                    clearTimeout(
+                        timeoutId
+                    );
+
+                }
+
+
+                setTimeout(
+                    function () {
+
+                        if (
+                            form &&
+                            form.parentNode
+                        ) {
+
+                            form.parentNode.removeChild(
+                                form
+                            );
+
+                        }
+
+
+                        if (
+                            iframe &&
+                            iframe.parentNode
+                        ) {
+
+                            iframe.parentNode.removeChild(
+                                iframe
+                            );
+
+                        }
+
+                    },
+                    500
+                );
+
+            }
+
+
+            /*************************************************
+             * สำเร็จ
+             *************************************************/
+
+            function completeSuccess() {
+
+                if (completed) {
+                    return;
+                }
+
+
+                completed =
+                    true;
+
+
+                cleanup();
+
+
+                resolve({
+
+                    success:
+                        true,
+
+                    message:
+                        "ส่งข้อมูลสำเร็จ"
+
+                });
+
+            }
+
+
+            /*************************************************
+             * Error
+             *************************************************/
+
+            function completeError(
+                message
+            ) {
+
+                if (completed) {
+                    return;
+                }
+
+
+                completed =
+                    true;
+
+
+                cleanup();
+
+
+                reject(
+                    new Error(
+                        message
+                    )
+                );
+
+            }
+
+
+            /*************************************************
+             * เมื่อ Iframe โหลดเสร็จ
+             *************************************************/
+
+            iframe.addEventListener(
+                "load",
+                function () {
+
+                    /*
+                     * Apps Script รับข้อมูลแล้ว
+                     * ให้เวลาระบบบันทึก Sheet
+                     */
+
+                    setTimeout(
+                        function () {
+
+                            completeSuccess();
+
+                        },
+                        1000
+                    );
+
+                }
+            );
+
+
+            /*************************************************
+             * Timeout
+             *************************************************/
+
+            timeoutId =
+                setTimeout(
+                    function () {
+
+                        completeError(
+
+                            "หมดเวลารอ Google Apps Script " +
+                            "กรุณาตรวจสอบ Apps Script และการ Deploy"
+
+                        );
+
+                    },
+                    30000
+                );
+
+
+            /*************************************************
+             * Submit
+             *************************************************/
+
+            try {
+
+                form.submit();
+
+            } catch (error) {
+
+                completeError(
+                    "ไม่สามารถส่งข้อมูลไปยัง Google Apps Script ได้"
+                );
+
+            }
+
+        }
+    );
 
 }
 
 
 /*************************************************
- * แปลงไฟล์เป็น Base64
+ * แปลงรูปภาพเป็น Base64
  *************************************************/
 
 function convertFileToBase64(file) {
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(
+        function (resolve, reject) {
 
-        const reader =
-            new FileReader();
-
-
-        reader.onload =
-            function () {
-
-                resolve(
-                    reader.result
-                );
-
-            };
+            const reader =
+                new FileReader();
 
 
-        reader.onerror =
-            function () {
+            reader.onload =
+                function () {
 
-                reject(
-                    new Error(
-                        "อ่านไฟล์ไม่สำเร็จ"
-                    )
-                );
+                    resolve(
+                        reader.result
+                    );
 
-            };
+                };
 
 
-        reader.readAsDataURL(
-            file
-        );
+            reader.onerror =
+                function () {
 
-    });
+                    reject(
+                        new Error(
+                            "อ่านรูปภาพไม่สำเร็จ"
+                        )
+                    );
+
+                };
+
+
+            reader.readAsDataURL(
+                file
+            );
+
+        }
+    );
 
 }
 
 
 /*************************************************
- * สร้างหมายเลข Ticket
+ * สร้าง Ticket Number
  *************************************************/
 
 function createTicketNumber() {
 
-    const now = new Date();
-
-const dateTime =
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, "0") + "-" +
-    String(now.getDate()).padStart(2, "0") + " " +
-    String(now.getHours()).padStart(2, "0") + ":" +
-    String(now.getMinutes()).padStart(2, "0") + ":" +
-    String(now.getSeconds()).padStart(2, "0");
+    const now =
+        new Date();
 
 
     const year =
@@ -723,38 +1023,49 @@ const dateTime =
 function getValue(id) {
 
     const element =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (!element) {
+
         return "";
+
     }
 
 
-    return element.value.trim();
+    return (
+        element.value ||
+        ""
+    ).trim();
 
 }
 
 
 /*************************************************
- * Focus Element
+ * Focus
  *************************************************/
 
 function focusElement(id) {
 
     const element =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (element) {
+
         element.focus();
+
     }
 
 }
 
 
 /*************************************************
- * แสดงข้อความสำเร็จ
+ * แสดง Success
  *************************************************/
 
 function showSuccess(message) {
@@ -764,6 +1075,7 @@ function showSuccess(message) {
             "successMessage"
         );
 
+
     const errorMessage =
         document.getElementById(
             "errorMessage"
@@ -771,7 +1083,10 @@ function showSuccess(message) {
 
 
     if (errorMessage) {
-        errorMessage.hidden = true;
+
+        errorMessage.hidden =
+            true;
+
     }
 
 
@@ -780,12 +1095,19 @@ function showSuccess(message) {
         successMessage.textContent =
             message;
 
+
         successMessage.hidden =
             false;
 
+
         successMessage.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
+
+            behavior:
+                "smooth",
+
+            block:
+                "center"
+
         });
 
     } else {
@@ -798,7 +1120,7 @@ function showSuccess(message) {
 
 
 /*************************************************
- * แสดงข้อความผิดพลาด
+ * แสดง Error
  *************************************************/
 
 function showError(message) {
@@ -808,6 +1130,7 @@ function showError(message) {
             "successMessage"
         );
 
+
     const errorMessage =
         document.getElementById(
             "errorMessage"
@@ -815,7 +1138,10 @@ function showError(message) {
 
 
     if (successMessage) {
-        successMessage.hidden = true;
+
+        successMessage.hidden =
+            true;
+
     }
 
 
@@ -824,12 +1150,19 @@ function showError(message) {
         errorMessage.textContent =
             message;
 
+
         errorMessage.hidden =
             false;
 
+
         errorMessage.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
+
+            behavior:
+                "smooth",
+
+            block:
+                "center"
+
         });
 
     } else {
@@ -852,6 +1185,7 @@ function hideMessages() {
             "successMessage"
         );
 
+
     const errorMessage =
         document.getElementById(
             "errorMessage"
@@ -859,12 +1193,18 @@ function hideMessages() {
 
 
     if (successMessage) {
-        successMessage.hidden = true;
+
+        successMessage.hidden =
+            true;
+
     }
 
 
     if (errorMessage) {
-        errorMessage.hidden = true;
+
+        errorMessage.hidden =
+            true;
+
     }
 
 }
