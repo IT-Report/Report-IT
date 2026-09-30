@@ -1,46 +1,122 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบ | Issue Report System</title>
-    <link rel="icon" type="image/png" href="logoweb.png">
-    <link rel="stylesheet" href="login.css">
+    <title>Issue Report System - ระบบแจ้งปัญหาภายในองค์กร</title>
+    
+    <!-- ดึงไฟล์ CSS (หาก report.html อยู่ในโฟลเดอร์เดียวกับ report.css ให้ใช้ ./report.css) -->
+    <!-- หาก report.html อยู่ในโฟลเดอร์ pages/ ให้ใช้ ../report.css -->
+    <link rel="stylesheet" href="./report.css">
 </head>
-
 <body>
-    <main>
-        <header>
-            <img src="logo.png" alt="KFT Company Logo" width="150">
-            <h1>Issue Report System</h1>
-            <p>Kotobukiya Feltol (Thailand) Co.,Ltd</p>
-        </header>
 
-        <section>
-            <h2>เข้าสู่ระบบ</h2>
-            <p>กรุณาเข้าสู่ระบบเพื่อแจ้งปัญหา</p>
-
-            <form id="loginForm">
-                <div>
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="กรอก Username" autocomplete="username" required>
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-container">
+            <a href="#" class="brand">
+                <img src="../assets/logo.png" alt="KFT Company Logo" class="company-logo" onerror="this.style.display='none'">
+                <div class="brand-text">
+                    <h1>Issue Report System</h1>
+                    <p>ระบบแจ้งปัญหาภายในองค์กร</p>
                 </div>
+            </a>
+            <button type="button" id="logoutButton" class="logout-button">
+                &hookleftarrow; ออกจากระบบ
+            </button>
+        </div>
+    </header>
 
-                <div>
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="กรอก Password" autocomplete="current-password" required>
-                </div>
+    <!-- MAIN CONTAINER -->
+    <main class="main-container">
 
-                <button type="submit" id="loginButton">เข้าสู่ระบบ</button>
-            </form>
+        <!-- USER INFO CARD -->
+        <section class="user-info-card">
+            <div>
+                <span class="info-label">ผู้ใช้งาน</span>
+                <strong id="displayUsername">-</strong>
+            </div>
+            <div>
+                <span class="info-label">แผนก</span>
+                <strong id="displayDepartment">-</strong>
+            </div>
         </section>
 
-        <footer>
-            <p>IT Support • Kotobukiya Feltol (Thailand) Co.,Ltd</p>
-        </footer>
+        <!-- REPORT CARD -->
+        <section class="report-card">
+            <div class="report-card-header">
+                <h2>แจ้งปัญหา</h2>
+                <p>กรุณากรอกรายละเอียดของปัญหาที่พบ</p>
+            </div>
+
+            <!-- MESSAGES -->
+            <div id="errorMessage" class="message error-message" hidden></div>
+            <div id="successMessage" class="message success-message" hidden></div>
+
+            <!-- FORM -->
+            <form id="reportForm" class="report-form" novalidate>
+                
+                <div class="form-group">
+                    <label for="issueType" class="form-label">ประเภทปัญหา <span class="required">*</span></label>
+                    <select id="issueType" class="form-control" required>
+                        <option value="">-- เลือกประเภทปัญหา --</option>
+                        <option value="Hardware">Hardware / อุปกรณ์ชำรุด</option>
+                        <option value="Software">Software / โปรแกรมมีปัญหา</option>
+                        <option value="Network">Network / อินเทอร์เน็ต</option>
+                        <option value="Other">อื่นๆ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">รายละเอียดปัญหา <span class="required">*</span></label>
+                    <textarea id="description" class="form-control textarea-control" placeholder="อธิบายอาการหรือปัญหาที่พบ..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="assetNumber" class="form-label">หมายเลขทรัพย์สิน / รหัสเครื่อง <span class="optional">(ถ้ามี)</span></label>
+                    <input type="text" id="assetNumber" class="form-control" placeholder="เช่น KFT-PC-001">
+                </div>
+
+                <div class="form-group">
+                    <label for="image" class="form-label">รูปภาพประกอบ <span class="optional">(ถ้ามี)</span></label>
+                    <input type="file" id="image" class="form-control file-control" accept="image/*">
+                    <small class="form-help">รองรับไฟล์รูปภาพ เช่น JPG, PNG และ WEBP (ขนาดไม่เกิน 5 MB)</small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" id="submitButton" class="submit-button">
+                        &gt; ส่งแจ้งปัญหา
+                    </button>
+                    <button type="button" id="resetButton" class="reset-button">
+                        ล้างข้อมูล
+                    </button>
+                </div>
+
+            </form>
+        </section>
     </main>
 
-    <script src="login.js"></script>
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <p>IT Support &bull; KFT Issue Report System</p>
+    </footer>
+
+    <!-- JAVASCRIPT FILES -->
+    <!-- หากเรียกจากโฟลเดอร์ pages/ ให้ใส่ Path ให้ถูกต้อง เช่น ./auth.js หรือ ../auth.js -->
+    <script src="./auth.js"></script>
+    <script src="./report.js"></script>
+
+    <script>
+        // แสดงข้อมูล User เบื้องต้นบนหน้าจอ
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof getCurrentUser === "function") {
+                const user = getCurrentUser();
+                if (user) {
+                    document.getElementById("displayUsername").textContent = user.username || "-";
+                    document.getElementById("displayDepartment").textContent = user.department || "-";
+                }
+            }
+        });
+    </script>
 </body>
 </html>
