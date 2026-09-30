@@ -166,12 +166,16 @@ async function handleReportSubmit(event) {
      * อ่านข้อมูลจาก Form
      *************************************************/
 
+    
+
     /*
-     * แก้ไขแล้ว: HTML ใช้ id="issueType"
+     * สำคัญ
+     * HTML ใช้ id="issueType"
+     * ไม่ใช่ category
      */
 
     const issueType =
-        getValue("issueType");
+        getValue("category");
 
 
     const description =
@@ -190,13 +194,15 @@ async function handleReportSubmit(event) {
      * ตรวจสอบข้อมูล
      *************************************************/
 
+
+
     if (!issueType) {
 
         showError(
             "กรุณาเลือกประเภทปัญหา"
         );
 
-        focusElement("issueType");
+        focusElement("category");
 
         return;
     }
@@ -212,6 +218,8 @@ async function handleReportSubmit(event) {
 
         return;
     }
+
+
 
 
     /*************************************************
@@ -300,6 +308,8 @@ async function handleReportSubmit(event) {
 
     /*************************************************
      * เวลาปัจจุบันของเครื่องผู้ใช้
+     *
+     * ใช้เวลาท้องถิ่นไทย
      *************************************************/
 
     const now =
@@ -315,22 +325,22 @@ async function handleReportSubmit(event) {
      *************************************************/
 
     const payload = {
-        action: "createIssue",
+    action: "createIssue",
 
-        ticket: ticket,
-        dateTime: dateTime,
+    ticket: ticket,
+    dateTime: dateTime,
 
-        user: currentUser.username || currentUser.user || "",
-        department: currentUser.department || "",
+    user: currentUser.username || currentUser.user || "",
+    department: currentUser.department || "",
 
-        category: issueType,
-        description: description,
-        assetNumber: assetNumber,
+    category: issueType,
+    description: description,
+    assetNumber: assetNumber,
 
-        status: "รอดำเนินการ",
+    status: "รอดำเนินการ",
 
-        image: imageBase64
-    };
+    image: imageBase64
+};
 
 
     console.log(
@@ -441,6 +451,9 @@ async function handleReportSubmit(event) {
 
 /*************************************************
  * ส่งข้อมูลไป Google Apps Script
+ *
+ * ใช้ Hidden Iframe
+ * เพื่อหลีกเลี่ยง CORS
  *************************************************/
 
 function postToGoogleAppsScript(payload) {
@@ -591,6 +604,10 @@ function postToGoogleAppsScript(payload) {
             }
 
 
+            /*
+             * Google Apps Script ตอบกลับ
+             */
+
             iframe.addEventListener(
                 "load",
                 function () {
@@ -606,6 +623,15 @@ function postToGoogleAppsScript(payload) {
 
                     cleanup();
 
+
+                    /*
+                     * เนื่องจาก iframe
+                     * ไม่สามารถอ่าน response
+                     * ข้าม domain ได้
+                     *
+                     * จึงถือว่าการ POST
+                     * สำเร็จเมื่อ iframe load
+                     */
 
                     resolve({
 
@@ -623,6 +649,10 @@ function postToGoogleAppsScript(payload) {
                 }
             );
 
+
+            /*
+             * ส่ง
+             */
 
             try {
 
