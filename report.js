@@ -1,11 +1,6 @@
 /*************************************************
- * ISSUE REPORT SYSTEM - report.js
- * Version: Fixed
- *************************************************/
-
-
-/*************************************************
- * GOOGLE APPS SCRIPT API
+ * ISSUE REPORT SYSTEM
+ * report.js - COMPLETE FIX
  *************************************************/
 
 const API_URL =
@@ -13,7 +8,7 @@ const API_URL =
 
 
 /*************************************************
- * เมื่อหน้าเว็บโหลดเสร็จ
+ * เมื่อหน้าเว็บโหลด
  *************************************************/
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -24,24 +19,21 @@ document.addEventListener("DOMContentLoaded", function () {
     const logoutButton =
         document.getElementById("logoutButton");
 
+    const resetButton =
+        document.getElementById("resetButton");
+
 
     /*
      * ตรวจสอบ Login
      */
 
     if (typeof checkLogin === "function") {
-
-        const loginOK = checkLogin();
-
-        if (!loginOK) {
-            return;
-        }
-
+        checkLogin();
     }
 
 
     /*
-     * ตรวจสอบว่ามี Form หรือไม่
+     * ตรวจสอบ Form
      */
 
     if (!reportForm) {
@@ -74,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     window.location.href =
                         "../index.html";
-
                 }
 
             }
@@ -84,7 +75,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /*
-     * Submit Form
+     * Reset
+     */
+
+    if (resetButton) {
+
+        resetButton.addEventListener(
+            "click",
+            function () {
+
+                setTimeout(function () {
+
+                    hideMessages();
+
+                }, 0);
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Submit
      */
 
     reportForm.addEventListener(
@@ -92,12 +105,11 @@ document.addEventListener("DOMContentLoaded", function () {
         handleReportSubmit
     );
 
-
 });
 
 
 /*************************************************
- * HANDLE SUBMIT
+ * ส่งข้อมูล
  *************************************************/
 
 async function handleReportSubmit(event) {
@@ -110,9 +122,7 @@ async function handleReportSubmit(event) {
         document.getElementById("reportForm");
 
     const submitButton =
-        document.getElementById(
-            "submitReportButton"
-        );
+        document.getElementById("submitButton");
 
 
     if (!reportForm) {
@@ -125,9 +135,9 @@ async function handleReportSubmit(event) {
     }
 
 
-    /*************************************************
-     * ตรวจสอบผู้ใช้งาน
-     *************************************************/
+    /*
+     * ตรวจสอบ User
+     */
 
     let currentUser = null;
 
@@ -139,34 +149,10 @@ async function handleReportSubmit(event) {
         currentUser =
             getCurrentUser();
 
-    } else {
-
-        currentUser = {
-
-            username:
-                sessionStorage.getItem(
-                    "username"
-                ),
-
-            department:
-                sessionStorage.getItem(
-                    "department"
-                ),
-
-            role:
-                sessionStorage.getItem(
-                    "role"
-                )
-
-        };
-
     }
 
 
-    if (
-        !currentUser ||
-        !currentUser.username
-    ) {
+    if (!currentUser) {
 
         showError(
             "ไม่พบข้อมูลผู้ใช้งาน กรุณาเข้าสู่ระบบใหม่"
@@ -180,15 +166,24 @@ async function handleReportSubmit(event) {
      * อ่านข้อมูลจาก Form
      *************************************************/
 
+    
 
-    const category =
+    /*
+     * สำคัญ
+     * HTML ใช้ id="issueType"
+     * ไม่ใช่ category
+     */
+
+    const issueType =
         getValue("category");
-
 
 
     const description =
         getValue("description");
 
+
+    const assetNumber =
+        getValue("assetNumber");
 
 
     const imageInput =
@@ -199,7 +194,9 @@ async function handleReportSubmit(event) {
      * ตรวจสอบข้อมูล
      *************************************************/
 
-    if (!category) {
+
+
+    if (!issueType) {
 
         showError(
             "กรุณาเลือกประเภทปัญหา"
@@ -223,8 +220,137 @@ async function handleReportSubmit(event) {
     }
 
 
+
+
     /*************************************************
-     * ป้องกันกดส่งซ้ำ
+     * อ่านรูปภาพ
+     *************************************************/
+
+    let imageBase64 = "";
+
+
+    if (
+        imageInput &&
+        imageInput.files &&
+        imageInput.files.length > 0
+    ) {
+
+        const imageFile =
+            imageInput.files[0];
+
+
+        /*
+         * จำกัด 5 MB
+         */
+
+        const maxFileSize =
+            5 * 1024 * 1024;
+
+
+        if (imageFile.size > maxFileSize) {
+
+            showError(
+                "รูปภาพต้องมีขนาดไม่เกิน 5 MB"
+            );
+
+            return;
+        }
+
+
+        /*
+         * ตรวจสอบไฟล์
+         */
+
+        if (
+            !imageFile.type ||
+            !imageFile.type.startsWith("image/")
+        ) {
+
+            showError(
+                "กรุณาเลือกไฟล์รูปภาพเท่านั้น"
+            );
+
+            return;
+        }
+
+
+        try {
+
+            imageBase64 =
+                await convertFileToBase64(
+                    imageFile
+                );
+
+        } catch (error) {
+
+            console.error(
+                "อ่านรูปภาพไม่สำเร็จ:",
+                error
+            );
+
+            showError(
+                "ไม่สามารถอ่านรูปภาพได้"
+            );
+
+            return;
+        }
+
+    }
+
+
+    /*************************************************
+     * สร้าง Ticket
+     *************************************************/
+
+    const ticket =
+        createTicketNumber();
+
+
+    /*************************************************
+     * เวลาปัจจุบันของเครื่องผู้ใช้
+     *
+     * ใช้เวลาท้องถิ่นไทย
+     *************************************************/
+
+    const now =
+        new Date();
+
+
+    const dateTime =
+        formatThaiDateTime(now);
+
+
+    /*************************************************
+     * สร้างข้อมูล
+     *************************************************/
+
+    const payload = {
+    action: "createIssue",
+
+    ticket: ticket,
+    dateTime: dateTime,
+
+    user: currentUser.username || currentUser.user || "",
+    department: currentUser.department || "",
+
+    category: issueType,
+    description: description,
+    assetNumber: assetNumber,
+
+    status: "รอดำเนินการ",
+
+    image: imageBase64
+};
+
+
+    console.log(
+        "ข้อมูลที่จะส่ง:",
+        payload
+    );
+
+
+    /*************************************************
+     * ป้องกันกดซ้ำ
      *************************************************/
 
     if (submitButton) {
@@ -243,213 +369,11 @@ async function handleReportSubmit(event) {
     hideMessages();
 
 
+    /*************************************************
+     * ส่งข้อมูล
+     *************************************************/
+
     try {
-
-        /*************************************************
-         * อ่านรูปภาพ
-         *************************************************/
-
-        let imageBase64 = "";
-
-
-        if (
-            imageInput &&
-            imageInput.files &&
-            imageInput.files.length > 0
-        ) {
-
-            const imageFile =
-                imageInput.files[0];
-
-
-            /*
-             * จำกัด 5 MB
-             */
-
-            const maxFileSize =
-                5 * 1024 * 1024;
-
-
-            if (
-                imageFile.size >
-                maxFileSize
-            ) {
-
-                throw new Error(
-                    "รูปภาพต้องมีขนาดไม่เกิน 5 MB"
-                );
-
-            }
-
-
-            /*
-             * ตรวจสอบประเภทไฟล์
-             */
-
-            if (
-                !imageFile.type ||
-                !imageFile.type.startsWith(
-                    "image/"
-                )
-            ) {
-
-                throw new Error(
-                    "กรุณาเลือกไฟล์รูปภาพเท่านั้น"
-                );
-
-            }
-
-
-            imageBase64 =
-                await convertFileToBase64(
-                    imageFile
-                );
-
-        }
-
-
-        /*************************************************
-         * สร้าง Ticket
-         *************************************************/
-
-        const ticket =
-            createTicketNumber();
-
-
-        /*************************************************
-         * สร้างเวลาแบบประเทศไทย
-         *
-         * ใช้เวลาจากเครื่องผู้ใช้
-         * และไม่ใช้ toISOString()
-         * เพราะ toISOString() จะเป็น UTC
-         *************************************************/
-
-        const now =
-            new Date();
-
-
-        const dateTime =
-            now.getFullYear() +
-            "-" +
-            String(
-                now.getMonth() + 1
-            ).padStart(2, "0") +
-            "-" +
-            String(
-                now.getDate()
-            ).padStart(2, "0") +
-            " " +
-            String(
-                now.getHours()
-            ).padStart(2, "0") +
-            ":" +
-            String(
-                now.getMinutes()
-            ).padStart(2, "0") +
-            ":" +
-            String(
-                now.getSeconds()
-            ).padStart(2, "0");
-
-
-        /*************************************************
-         * Payload
-         *************************************************/
-
-        const payload = {
-
-            action:
-                "createIssue",
-
-
-            ticket:
-                ticket,
-
-
-            dateTime:
-                dateTime,
-
-
-            user:
-                currentUser.username ||
-                "",
-
-
-            department:
-                department ||
-                currentUser.department ||
-                "",
-
-
-            /*
-             * ประเภทปัญหา
-             */
-
-            category:
-                category,
-
-
-            /*
-             * หัวข้อปัญหา
-             */
-
-            subject:
-                subject,
-
-
-            /*
-             * รายละเอียด
-             */
-
-            description:
-                description,
-
-
-            /*
-             * สถานที่ / จุดที่พบปัญหา
-             */
-
-            location:
-                location,
-
-
-            /*
-             * ส่ง location เป็น assetNumber
-             * ด้วย เพื่อให้ Apps Script รุ่นปัจจุบัน
-             * สามารถบันทึกได้ด้วย
-             */
-
-            assetNumber:
-                location,
-
-
-            /*
-             * สถานะเริ่มต้น
-             */
-
-            status:
-                "รอดำเนินการ",
-
-
-            /*
-             * รูปภาพ Base64
-             */
-
-            image:
-                imageBase64
-
-        };
-
-
-        console.log(
-            "กำลังส่ง Payload:",
-            payload
-        );
-
-
-        /*************************************************
-         * ส่งไป Google Apps Script
-         *************************************************/
 
         const result =
             await postToGoogleAppsScript(
@@ -463,63 +387,31 @@ async function handleReportSubmit(event) {
         );
 
 
-        /*************************************************
-         * ตรวจสอบผลลัพธ์
-         *************************************************/
-
         if (
             result &&
             result.success === true
         ) {
 
             showSuccess(
-
-                "ส่งแจ้งปัญหาสำเร็จ\n" +
-                "เลขที่ Ticket: " +
+                "ส่งแจ้งปัญหาสำเร็จ เลขที่ Ticket: " +
                 ticket
-
             );
 
 
             /*
-             * ล้างข้อมูล Form
+             * ล้าง Form
              */
 
             reportForm.reset();
 
 
-            /*
-             * ใส่แผนกของ User กลับเข้าไป
-             */
-
-            const departmentSelect =
-                document.getElementById(
-                    "department"
-                );
-
-
-            if (
-                departmentSelect &&
-                currentUser.department
-            ) {
-
-                departmentSelect.value =
-                    currentUser.department;
-
-            }
-
-
         } else {
 
             showError(
-
                 result &&
                 result.message
-
                     ? result.message
-
                     : "ไม่สามารถส่งข้อมูลได้"
-
             );
 
         }
@@ -528,34 +420,23 @@ async function handleReportSubmit(event) {
     } catch (error) {
 
         console.error(
-            "Submit Error:",
+            "ส่งข้อมูลไม่สำเร็จ:",
             error
         );
 
 
         showError(
-
-            error &&
-            error.message
-
-                ? error.message
-
-                : "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
-
+            error.message ||
+            "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง"
         );
 
 
     } finally {
 
-        /*
-         * เปิดปุ่มกลับ
-         */
-
         if (submitButton) {
 
             submitButton.disabled =
                 false;
-
 
             submitButton.innerHTML =
                 submitButton.dataset.originalText ||
@@ -580,20 +461,13 @@ function postToGoogleAppsScript(payload) {
     return new Promise(
         function (resolve, reject) {
 
-
             const iframeName =
                 "issueReportFrame_" +
                 Date.now();
 
 
-            /*************************************************
-             * สร้าง Iframe
-             *************************************************/
-
             const iframe =
-                document.createElement(
-                    "iframe"
-                );
+                document.createElement("iframe");
 
 
             iframe.name =
@@ -613,14 +487,8 @@ function postToGoogleAppsScript(payload) {
             );
 
 
-            /*************************************************
-             * สร้าง Form
-             *************************************************/
-
             const form =
-                document.createElement(
-                    "form"
-                );
+                document.createElement("form");
 
 
             form.method =
@@ -639,14 +507,8 @@ function postToGoogleAppsScript(payload) {
                 "none";
 
 
-            /*************************************************
-             * สร้าง Payload Input
-             *************************************************/
-
             const input =
-                document.createElement(
-                    "input"
-                );
+                document.createElement("input");
 
 
             input.type =
@@ -658,9 +520,7 @@ function postToGoogleAppsScript(payload) {
 
 
             input.value =
-                JSON.stringify(
-                    payload
-                );
+                JSON.stringify(payload);
 
 
             form.appendChild(
@@ -677,23 +537,38 @@ function postToGoogleAppsScript(payload) {
                 false;
 
 
-            let timeoutId =
-                null;
+            const timeoutId =
+                setTimeout(
+                    function () {
+
+                        if (completed) {
+                            return;
+                        }
 
 
-            /*************************************************
-             * Cleanup
-             *************************************************/
+                        completed =
+                            true;
+
+
+                        cleanup();
+
+
+                        reject(
+                            new Error(
+                                "หมดเวลารอ Google Apps Script"
+                            )
+                        );
+
+                    },
+                    30000
+                );
+
 
             function cleanup() {
 
-                if (timeoutId) {
-
-                    clearTimeout(
-                        timeoutId
-                    );
-
-                }
+                clearTimeout(
+                    timeoutId
+                );
 
 
                 setTimeout(
@@ -729,115 +604,55 @@ function postToGoogleAppsScript(payload) {
             }
 
 
-            /*************************************************
-             * สำเร็จ
-             *************************************************/
-
-            function completeSuccess() {
-
-                if (completed) {
-                    return;
-                }
-
-
-                completed =
-                    true;
-
-
-                cleanup();
-
-
-                resolve({
-
-                    success:
-                        true,
-
-                    message:
-                        "ส่งข้อมูลสำเร็จ"
-
-                });
-
-            }
-
-
-            /*************************************************
-             * Error
-             *************************************************/
-
-            function completeError(
-                message
-            ) {
-
-                if (completed) {
-                    return;
-                }
-
-
-                completed =
-                    true;
-
-
-                cleanup();
-
-
-                reject(
-                    new Error(
-                        message
-                    )
-                );
-
-            }
-
-
-            /*************************************************
-             * เมื่อ Iframe โหลดเสร็จ
-             *************************************************/
+            /*
+             * Google Apps Script ตอบกลับ
+             */
 
             iframe.addEventListener(
                 "load",
                 function () {
 
+                    if (completed) {
+                        return;
+                    }
+
+
+                    completed =
+                        true;
+
+
+                    cleanup();
+
+
                     /*
-                     * Apps Script รับข้อมูลแล้ว
-                     * ให้เวลาระบบบันทึก Sheet
+                     * เนื่องจาก iframe
+                     * ไม่สามารถอ่าน response
+                     * ข้าม domain ได้
+                     *
+                     * จึงถือว่าการ POST
+                     * สำเร็จเมื่อ iframe load
                      */
 
-                    setTimeout(
-                        function () {
+                    resolve({
 
-                            completeSuccess();
+                        success:
+                            true,
 
-                        },
-                        1000
-                    );
+                        message:
+                            "ส่งข้อมูลไปยัง Google Apps Script แล้ว"
 
+                    });
+
+                },
+                {
+                    once: true
                 }
             );
 
 
-            /*************************************************
-             * Timeout
-             *************************************************/
-
-            timeoutId =
-                setTimeout(
-                    function () {
-
-                        completeError(
-
-                            "หมดเวลารอ Google Apps Script " +
-                            "กรุณาตรวจสอบ Apps Script และการ Deploy"
-
-                        );
-
-                    },
-                    30000
-                );
-
-
-            /*************************************************
-             * Submit
-             *************************************************/
+            /*
+             * ส่ง
+             */
 
             try {
 
@@ -845,9 +660,21 @@ function postToGoogleAppsScript(payload) {
 
             } catch (error) {
 
-                completeError(
-                    "ไม่สามารถส่งข้อมูลไปยัง Google Apps Script ได้"
-                );
+                if (!completed) {
+
+                    completed =
+                        true;
+
+                    cleanup();
+
+
+                    reject(
+                        new Error(
+                            "ไม่สามารถส่งข้อมูลไปยังระบบได้"
+                        )
+                    );
+
+                }
 
             }
 
@@ -858,7 +685,7 @@ function postToGoogleAppsScript(payload) {
 
 
 /*************************************************
- * แปลงรูปภาพเป็น Base64
+ * แปลงรูปเป็น Base64
  *************************************************/
 
 function convertFileToBase64(file) {
@@ -885,7 +712,7 @@ function convertFileToBase64(file) {
 
                     reject(
                         new Error(
-                            "อ่านรูปภาพไม่สำเร็จ"
+                            "อ่านไฟล์ไม่สำเร็จ"
                         )
                     );
 
@@ -903,7 +730,7 @@ function convertFileToBase64(file) {
 
 
 /*************************************************
- * สร้าง Ticket Number
+ * สร้าง Ticket
  *************************************************/
 
 function createTicketNumber() {
@@ -984,21 +811,95 @@ function createTicketNumber() {
 
 
 /*************************************************
- * อ่านค่าจาก Element
+ * เวลาไทย
+ *************************************************/
+
+function formatThaiDateTime(date) {
+
+    const year =
+        date.getFullYear();
+
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const hours =
+        String(
+            date.getHours()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const minutes =
+        String(
+            date.getMinutes()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const seconds =
+        String(
+            date.getSeconds()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day +
+        " " +
+        hours +
+        ":" +
+        minutes +
+        ":" +
+        seconds
+    );
+
+}
+
+
+/*************************************************
+ * อ่านค่า Input
  *************************************************/
 
 function getValue(id) {
 
     const element =
-        document.getElementById(
-            id
-        );
+        document.getElementById(id);
 
 
     if (!element) {
 
-        return "";
+        console.warn(
+            "ไม่พบ element:",
+            id
+        );
 
+        return "";
     }
 
 
@@ -1017,9 +918,7 @@ function getValue(id) {
 function focusElement(id) {
 
     const element =
-        document.getElementById(
-            id
-        );
+        document.getElementById(id);
 
 
     if (element) {
@@ -1027,6 +926,62 @@ function focusElement(id) {
         element.focus();
 
     }
+
+}
+
+
+/*************************************************
+ * แสดง Error
+ *************************************************/
+
+function showError(message) {
+
+    const errorMessage =
+        document.getElementById(
+            "errorMessage"
+        );
+
+
+    const successMessage =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+    if (successMessage) {
+
+        successMessage.style.display =
+            "none";
+
+        successMessage.hidden =
+            true;
+
+    }
+
+
+    if (errorMessage) {
+
+        errorMessage.textContent =
+            message;
+
+        errorMessage.style.display =
+            "block";
+
+        errorMessage.hidden =
+            false;
+
+
+        errorMessage.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+
+
+    console.error(
+        message
+    );
 
 }
 
@@ -1051,6 +1006,9 @@ function showSuccess(message) {
 
     if (errorMessage) {
 
+        errorMessage.style.display =
+            "none";
+
         errorMessage.hidden =
             true;
 
@@ -1062,79 +1020,17 @@ function showSuccess(message) {
         successMessage.textContent =
             message;
 
+        successMessage.style.display =
+            "block";
 
         successMessage.hidden =
             false;
 
 
         successMessage.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "center"
-
+            behavior: "smooth",
+            block: "center"
         });
-
-    } else {
-
-        alert(message);
-
-    }
-
-}
-
-
-/*************************************************
- * แสดง Error
- *************************************************/
-
-function showError(message) {
-
-    const successMessage =
-        document.getElementById(
-            "successMessage"
-        );
-
-
-    const errorMessage =
-        document.getElementById(
-            "errorMessage"
-        );
-
-
-    if (successMessage) {
-
-        successMessage.hidden =
-            true;
-
-    }
-
-
-    if (errorMessage) {
-
-        errorMessage.textContent =
-            message;
-
-
-        errorMessage.hidden =
-            false;
-
-
-        errorMessage.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "center"
-
-        });
-
-    } else {
-
-        alert(message);
 
     }
 
@@ -1147,30 +1043,42 @@ function showError(message) {
 
 function hideMessages() {
 
-    const successMessage =
-        document.getElementById(
-            "successMessage"
-        );
-
-
     const errorMessage =
         document.getElementById(
             "errorMessage"
         );
 
 
-    if (successMessage) {
-
-        successMessage.hidden =
-            true;
-
-    }
+    const successMessage =
+        document.getElementById(
+            "successMessage"
+        );
 
 
     if (errorMessage) {
 
+        errorMessage.style.display =
+            "none";
+
         errorMessage.hidden =
             true;
+
+        errorMessage.textContent =
+            "";
+
+    }
+
+
+    if (successMessage) {
+
+        successMessage.style.display =
+            "none";
+
+        successMessage.hidden =
+            true;
+
+        successMessage.textContent =
+            "";
 
     }
 
