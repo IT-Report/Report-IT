@@ -2,86 +2,85 @@
 <html lang="th">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>แจ้งปัญหา | Issue Report System</title>
+    <title>Issue Report System</title>
 
-    <!-- สำคัญ: report.html อยู่ใน pages จึงต้องใช้ ../ -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="../images/logoweb.png"
+    >
+
     <link rel="stylesheet" href="../css/report.css">
-    <link rel="stylesheet" href="../css/logout.css">
+
 </head>
+
 
 <body>
 
-    <!-- =========================
-         Header
-    ========================== -->
+    <!-- ส่วนหัวเว็บไซต์ -->
     <header class="site-header">
 
-        <div class="header-container">
+    <div class="header-container">
 
-            <a href="report.html" class="brand">
+        <a
+            href="report.html"
+            class="brand"
+        >
+            <img
+    src="../images/logo.png"
+    alt="KFT Company Logo"
+    width="150"
+>
 
-                <img
-                    src="../images/logo.png"
-                    alt="KFT Company Logo"
-                    class="company-logo"
-                >
+            <div class="brand-text">
+                <h1>Issue Report System</h1>
 
-                <div class="brand-text">
-
-                    <h1>Issue Report System</h1>
-
-                    <p>
-                        ระบบแจ้งปัญหาภายในองค์กร
-                    </p>
-
-                </div>
-
-            </a>
-
-            <div class="header-right">
-
-                <button
-                    type="button"
-                    id="logoutButton"
-                    class="logout-button"
-                    onclick="logout()"
-                >
-                    ออกจากระบบ
-                </button>
-
+                <p>
+                    ระบบแจ้งปัญหาภายในองค์กร
+                </p>
             </div>
+        </a>
 
-        </div>
+        <button
+            type="button"
+            id="logoutButton"
+            class="logout-button"
+        >
+            <span aria-hidden="true">↪</span>
+            ออกจากระบบ
+        </button>
 
-    </header>
+    </div>
+
+</header>
 
 
-    <!-- =========================
-         User Information
-    ========================== -->
-    <section class="user-info-section">
+    <!-- เนื้อหาหลัก -->
+    <main class="main-container">
 
-        <div class="user-info-card">
+        <!-- ข้อมูลผู้ใช้งาน -->
+        <section class="user-info-card">
 
-            <div class="user-info-item">
-
+            <div>
                 <span class="info-label">
                     ผู้ใช้งาน
                 </span>
 
-                <strong id="currentUser">
+                <strong id="currentUsername">
                     -
                 </strong>
-
             </div>
 
 
-            <div class="user-info-item">
-
+            <div>
                 <span class="info-label">
                     แผนก
                 </span>
@@ -89,22 +88,15 @@
                 <strong id="currentDepartment">
                     -
                 </strong>
-
             </div>
 
-        </div>
-
-    </section>
+        </section>
 
 
-    <!-- =========================
-         Main
-    ========================== -->
-    <main class="main-container">
-
+        <!-- กล่องแบบฟอร์ม -->
         <section class="report-card">
 
-            <div class="report-header">
+            <div class="report-card-header">
 
                 <h2>
                     แจ้งปัญหา
@@ -117,58 +109,57 @@
             </div>
 
 
-            <!-- =========================
-                 Message
-            ========================== -->
+            <!-- ข้อความแจ้งเตือน -->
             <div
-                id="message"
-                class="message"
-                style="display:none;"
-            ></div>
+                id="successMessage"
+                class="message success-message"
+                role="alert"
+                hidden
+            >
+                ส่งแจ้งปัญหาสำเร็จ
+            </div>
 
 
-            <!-- =========================
-                 Report Form
-            ========================== -->
+            <div
+                id="errorMessage"
+                class="message error-message"
+                role="alert"
+                hidden
+            >
+                ไม่สามารถส่งแจ้งปัญหาได้
+            </div>
+
+
+            <!-- แบบฟอร์มแจ้งปัญหา -->
             <form
                 id="reportForm"
-                enctype="multipart/form-data"
+                class="report-form"
+                novalidate
             >
 
-                <!-- หัวข้อปัญหา -->
-                <div class="form-group">
-
-                    <label for="subject">
-                        หัวข้อปัญหา
-                        <span class="required">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="subject"
-                        name="subject"
-                        placeholder="เช่น เครื่องพิมพ์ใช้งานไม่ได้"
-                        required
-                    >
-
-                </div>
-
-
+                
                 <!-- ประเภทปัญหา -->
                 <div class="form-group">
 
-                    <label for="problemType">
+                    <label
+                        for="category"
+                        class="form-label"
+                    >
                         ประเภทปัญหา
                         <span class="required">*</span>
                     </label>
 
                     <select
-                        id="problemType"
-                        name="problemType"
+                        id="category"
+                        name="category"
+                        class="form-control"
                         required
                     >
-
-                        <option value="">
+                        <option
+                            value=""
+                            selected
+                            disabled
+                        >
                             -- เลือกประเภทปัญหา --
                         </option>
 
@@ -176,35 +167,45 @@
                             คอมพิวเตอร์
                         </option>
 
-                        <option value="เครื่องพิมพ์">
-                            เครื่องพิมพ์
+                        <option value="Serverเข้าไม่ได้">
+                            Serverเข้าไม่ได้
                         </option>
 
-                        <option value="ระบบเครือข่าย">
-                            ระบบเครือข่าย
+                        <option value="เครื่องพิมพ์">
+                            เครื่องพิมพ์
                         </option>
 
                         <option value="โปรแกรม">
                             โปรแกรม
                         </option>
 
+                        <option value="ระบบอินเทอร์เน็ต">
+                            ระบบอินเทอร์เน็ต
+                        </option>
+
                         <option value="อุปกรณ์สำนักงาน">
                             อุปกรณ์สำนักงาน
                         </option>
-
-                        <option value="อื่นๆ">
-                            อื่นๆ
+                        
+                        <option value="tablet/IPAD">
+                            tablet/IPAD
                         </option>
 
+                        <option value="อื่น ๆ">
+                            อื่น ๆ
+                        </option>
                     </select>
 
                 </div>
 
 
-                <!-- รายละเอียด -->
+                <!-- รายละเอียดปัญหา -->
                 <div class="form-group">
 
-                    <label for="description">
+                    <label
+                        for="description"
+                        class="form-label"
+                    >
                         รายละเอียดปัญหา
                         <span class="required">*</span>
                     </label>
@@ -212,37 +213,23 @@
                     <textarea
                         id="description"
                         name="description"
+                        class="form-control textarea-control"
+                        placeholder="อธิบายอาการหรือปัญหาที่พบ..."
                         rows="6"
-                        placeholder="กรุณาอธิบายอาการหรือปัญหาที่พบ"
+                        maxlength="2000"
                         required
                     ></textarea>
 
                 </div>
 
-
-                <!-- สถานที่ -->
+                
+                <!-- หมายเลขอุปกรณ์ -->
                 <div class="form-group">
 
-                    <label for="location">
-                        สถานที่ / จุดที่พบปัญหา
-                        <span class="required">*</span>
-                    </label>
-
-                    <input
-                        type="text"
-                        id="location"
-                        name="location"
-                        placeholder="เช่น ห้อง GAD, Production 1"
-                        required
+                    <label
+                        for="assetNumber"
+                        class="form-label"
                     >
-
-                </div>
-
-
-                <!-- รหัสเครื่อง -->
-                <div class="form-group">
-
-                    <label for="assetNumber">
                         หมายเลขทรัพย์สิน / รหัสเครื่อง
                         <span class="optional">
                             (ถ้ามี)
@@ -253,7 +240,9 @@
                         type="text"
                         id="assetNumber"
                         name="assetNumber"
+                        class="form-control"
                         placeholder="เช่น KFT-PC-001"
+                        maxlength="100"
                     >
 
                 </div>
@@ -262,7 +251,10 @@
                 <!-- รูปภาพ -->
                 <div class="form-group">
 
-                    <label for="image">
+                    <label
+                        for="image"
+                        class="form-label"
+                    >
                         รูปภาพประกอบ
                         <span class="optional">
                             (ถ้ามี)
@@ -273,33 +265,18 @@
                         type="file"
                         id="image"
                         name="image"
-                        accept="image/png,image/jpeg,image/webp"
+                        class="form-control file-control"
+                        accept="image/*"
                     >
 
-                    <small class="file-help">
-                        รองรับไฟล์ JPG, PNG และ WEBP
+                    <small class="form-help">
+                        รองรับไฟล์รูปภาพ เช่น JPG, PNG และ WEBP
                     </small>
 
                 </div>
 
 
-                <!-- Preview รูป -->
-                <div
-                    id="imagePreviewContainer"
-                    class="image-preview-container"
-                    style="display:none;"
-                >
-
-                    <img
-                        id="imagePreview"
-                        class="image-preview"
-                        alt="ตัวอย่างรูปภาพ"
-                    >
-
-                </div>
-
-
-                <!-- ปุ่ม -->
+                <!-- ปุ่มส่งข้อมูล -->
                 <div class="form-actions">
 
                     <button
@@ -307,6 +284,7 @@
                         id="submitButton"
                         class="submit-button"
                     >
+                        <span aria-hidden="true">➤</span>
                         ส่งแจ้งปัญหา
                     </button>
 
@@ -327,155 +305,99 @@
     </main>
 
 
-    <!-- =========================
-         Footer
-    ========================== -->
+    <!-- ส่วนท้าย -->
     <footer class="site-footer">
 
         <p>
-            IT Support • Kotobukiya Feltol (Thailand) Co.,Ltd
+            IT Support • KFT Issue Report System
         </p>
 
     </footer>
 
 
-    <!-- =========================
-         JavaScript
-    ========================== -->
-
+    <!-- JavaScript ตรวจสอบสิทธิ์ -->
     <script src="../js/auth.js"></script>
 
+
+    <!-- ตรวจสอบการ Login -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        if (typeof checkLogin === "function") {
+            checkLogin();
+        } else {
+            console.error(
+                "ไม่พบฟังก์ชัน checkLogin() จาก auth.js"
+            );
+        }
+    </script>
 
-            if (typeof checkLogin === "function") {
-                checkLogin();
-            }
 
-            if (typeof getCurrentUser === "function") {
+    <!-- แสดงข้อมูลผู้ใช้งานและจัดการ Logout -->
+    <script>
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
-                const user = getCurrentUser();
+                const user =
+                    typeof getCurrentUser === "function"
+                        ? getCurrentUser()
+                        : null;
+
+                const currentUsername =
+                    document.getElementById(
+                        "currentUsername"
+                    );
+
+                const currentDepartment =
+                    document.getElementById(
+                        "currentDepartment"
+                    );
+
+                const logoutButton =
+                    document.getElementById(
+                        "logoutButton"
+                    );
+
 
                 if (user) {
-
-                    const usernameElement =
-                        document.getElementById("currentUser");
-
-                    const departmentElement =
-                        document.getElementById("currentDepartment");
-
-
-                    if (usernameElement) {
-                        usernameElement.textContent =
-                            user.username ||
-                            user.user ||
-                            "-";
+                    if (currentUsername) {
+                        currentUsername.textContent =
+                            user.username || "-";
                     }
 
-
-                    if (departmentElement) {
-                        departmentElement.textContent =
-                            user.department ||
-                            "-";
+                    if (currentDepartment) {
+                        currentDepartment.textContent =
+                            user.department || "-";
                     }
+                }
 
+
+                if (logoutButton) {
+                    logoutButton.addEventListener(
+                        "click",
+                        function () {
+
+                            if (
+                                typeof logout === "function"
+                            ) {
+                                logout();
+                            } else {
+                                sessionStorage.clear();
+
+                                window.location.href =
+                                    "../index.html";
+                            }
+
+                        }
+                    );
                 }
 
             }
-
-        });
+        );
     </script>
 
 
+    <!-- JavaScript ระบบแจ้งปัญหา -->
     <script src="../js/report.js"></script>
-
-
-    <!-- Preview รูปภาพ -->
-    <script>
-
-        const imageInput =
-            document.getElementById("image");
-
-        const imagePreview =
-            document.getElementById("imagePreview");
-
-        const imagePreviewContainer =
-            document.getElementById("imagePreviewContainer");
-
-
-        if (imageInput) {
-
-            imageInput.addEventListener("change", function () {
-
-                const file = this.files[0];
-
-                if (!file) {
-
-                    imagePreviewContainer.style.display = "none";
-
-                    imagePreview.src = "";
-
-                    return;
-                }
-
-
-                if (!file.type.startsWith("image/")) {
-
-                    imagePreviewContainer.style.display = "none";
-
-                    imagePreview.src = "";
-
-                    return;
-                }
-
-
-                const reader = new FileReader();
-
-
-                reader.onload = function (event) {
-
-                    imagePreview.src =
-                        event.target.result;
-
-                    imagePreviewContainer.style.display =
-                        "block";
-
-                };
-
-
-                reader.readAsDataURL(file);
-
-            });
-
-        }
-
-
-        const reportForm =
-            document.getElementById("reportForm");
-
-
-        if (reportForm) {
-
-            reportForm.addEventListener("reset", function () {
-
-                setTimeout(function () {
-
-                    if (imagePreviewContainer) {
-                        imagePreviewContainer.style.display =
-                            "none";
-                    }
-
-                    if (imagePreview) {
-                        imagePreview.src = "";
-                    }
-
-                }, 0);
-
-            });
-
-        }
-
-    </script>
 
 </body>
 
