@@ -240,4 +240,5 @@ function getIssueValue(issue, field) {
         "IMAGE": ["IMAGE", "image", "imageUrl"]
     };
     const keys = aliases[field] || [field];
-    for (let key
+    for (let key of keys) {
+        if (issue[key] !== undefined
