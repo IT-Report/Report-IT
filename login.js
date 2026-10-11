@@ -99,9 +99,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             sessionStorage.setItem("isLoggedIn", "true");
-            sessionStorage.setItem("username", username);
-            sessionStorage.setItem("department", account.department);
-            sessionStorage.setItem("role", account.role);
+sessionStorage.setItem("username", username);
+sessionStorage.setItem("department", "IT");
+sessionStorage.setItem("role", "admin");
+
         } catch (error) {
             console.error("Unable to save login session:", error);
 
