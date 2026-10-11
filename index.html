@@ -1,115 +1,75 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ | Issue Report System</title>
-    <link
-        rel="icon"
-        type="image/png"
-        href="images/logoweb.png"
->   
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/logoweb.png">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="css/login.css">
 </head>
-
 <body>
 
-    <main>
+    <main class="login-container">
 
         <!-- ส่วนหัวระบบ -->
-        <header>
-
-            <img
-                src="images/logo.png"
-                alt="KFT Company Logo"
-                width="150"
-            >
-
+        <header class="login-header">
+            <img src="images/logo.png" alt="KFT Company Logo" class="logo" width="150">
             <h1>Issue Report System</h1>
-
-            <p>
-                Kotobukiya Feltol (Thailand) Co.,Ltd
-            </p>
-
+            <p>Kotobukiya Feltol (Thailand) Co.,Ltd</p>
         </header>
 
-
         <!-- Login Form -->
-        <section>
-
+        <section class="login-section">
             <h2>เข้าสู่ระบบ</h2>
+            <p>กรุณาเข้าสู่ระบบเพื่อแจ้งปัญหา</p>
 
-            <p>
-                กรุณาเข้าสู่ระบบเพื่อแจ้งปัญหา
-            </p>
-
-
-            <form id="loginForm">
-
-                <div>
-                    <label for="username">
-                        Username
-                    </label>
-
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
                     <input
                         type="text"
                         id="username"
                         name="username"
+                        class="form-control"
                         placeholder="กรอก Username"
                         autocomplete="username"
                         required
                     >
                 </div>
 
-
-                <div>
-                    <label for="password">
-                        Password
-                    </label>
-
+                <div class="form-group">
+                    <label for="password">Password</label>
                     <input
                         type="password"
                         id="password"
                         name="password"
+                        class="form-control"
                         placeholder="กรอก Password"
                         autocomplete="current-password"
                         required
                     >
                 </div>
 
-
-                <button
-                    type="submit"
-                    id="loginButton"
-                >
-                    เข้าสู่ระบบ
-                </button>
-
+                <div class="form-actions">
+                    <button type="submit" id="loginButton" class="submit-button">
+                        เข้าสู่ระบบ
+                    </button>
+                </div>
             </form>
-
         </section>
 
-
         <!-- Footer -->
-        <footer>
-
-            <p>
-                IT Support • Kotobukiya Feltol (Thailand) Co.,Ltd
-            </p>
-
+        <footer class="login-footer">
+            <p>IT Support • Kotobukiya Feltol (Thailand) Co.,Ltd</p>
         </footer>
 
     </main>
 
-
+    <!-- JS -->
     <script src="js/login.js"></script>
-
 </body>
-
 </html>
