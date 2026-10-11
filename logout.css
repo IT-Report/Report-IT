@@ -1,26 +1,43 @@
+```css
 /* ปุ่มออกจากระบบ */
 #logoutButton {
     position: fixed;
     top: 20px;
     right: 25px;
-
     width: auto;
     padding: 7px 12px;
 
     border: 1px solid #d5d9df;
     border-radius: 6px;
 
-    background: #ffffff;
-    color: #555;
+    background-color: #ffffff;
+    color: #555555;
 
     font-size: 12px;
     font-weight: normal;
+    font-family: inherit;
 
     cursor: pointer;
     box-shadow: none;
+
+    z-index: 1000;
+    box-sizing: border-box;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* เอฟเฟกต์เมื่อเลื่อนเมาส์ */
 #logoutButton:hover {
-    background: #f4f6f9;
+    background-color: #f4f6f9;
     color: #2563eb;
 }
+
+/* รองรับหน้าจอมือถือ */
+@media (max-width: 600px) {
+    #logoutButton {
+        top: 12px;
+        right: 12px;
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+```
