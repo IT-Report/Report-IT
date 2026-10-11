@@ -9,18 +9,7 @@
 }
 
 
-/* =========================
-   Body
-========================= */
-
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f9;
-    color: #333;
-
-    min-height: 100vh;
-
-    display: flex;
+/* ====================a
     justify-content: center;
     align-items: center;
 }
