@@ -1,144 +1,70 @@
-/*************************************************
- * LOGIN SYSTEM
- *************************************************/
+```css
+/* =========================
+   Login Button
+========================= */
 
-const departmentAccounts = {
-    GAD: {
-        password: "KftcGad",
-        department: "GAD",
-        role: "employee"
-    },
+#loginForm button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
 
-    QCD: {
-        password: "KftcQcd",
-        department: "QCD",
-        role: "employee"
-    },
+    border: none;
+    border-radius: 7px;
 
-    ACD: {
-        password: "KftcAcd",
-        department: "ACD",
-        role: "employee"
-    },
+    background: #2563eb;
+    color: #ffffff;
 
-    MKD: {
-        password: "KftcMkd",
-        department: "MKD",
-        role: "employee"
-    },
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
 
-    PSD: {
-        password: "KftcPsd",
-        department: "PSD",
-        role: "employee"
-    },
+    transition: background-color 0.2s ease;
+}
 
-    PED: {
-        password: "KftcPed",
-        department: "PED",
-        role: "employee"
-    },
+#loginForm button[type="submit"]:hover {
+    background: #1d4ed8;
+}
 
-    PDD: {
-        password: "KftcPdd",
-        department: "PDD",
-        role: "employee"
-    },
+/* =========================
+   Logout Button
+========================= */
 
-    PCS: {
-        password: "KftcPcs",
-        department: "PCS",
-        role: "employee"
-    },
+#logoutButton {
+    position: fixed;
+    top: 20px;
+    right: 25px;
 
-    PCD: {
-        password: "KftcPcd",
-        department: "PCD",
-        role: "employee"
-    },
-    
-    
-    PRD: {
-        password: "KftcPrd",
-        department: "PRD",
-        role: "employee"
-    },
+    width: auto;
+    padding: 7px 12px;
+    margin: 0;
 
-    ADMIN: {
-        password: "Admin12345678",
-        department: "IT",
-        role: "admin"
+    border: 1px solid #d5d9df;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #555555;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: normal;
+
+    cursor: pointer;
+    box-shadow: none;
+    z-index: 1000;
+
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#logoutButton:hover {
+    background: #f4f6f9;
+    color: #2563eb;
+}
+
+@media (max-width: 600px) {
+    #logoutButton {
+        top: 12px;
+        right: 12px;
+        padding: 6px 10px;
     }
-};
-
-
-/*************************************************
- * LOGIN FORM
- *************************************************/
-
-document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("loginForm");
-
-    if (!loginForm) {
-        return;
-    }
-
-    loginForm.addEventListener("submit", function (event) {
-        event.preventDefault();
-
-        const usernameInput = document.getElementById("username");
-        const passwordInput = document.getElementById("password");
-
-        const username = usernameInput.value
-            .trim()
-            .toUpperCase();
-
-        const password = passwordInput.value;
-
-        if (username === "") {
-            alert("กรุณากรอก Username");
-            usernameInput.focus();
-            return;
-        }
-
-        if (password === "") {
-            alert("กรุณากรอก Password");
-            passwordInput.focus();
-            return;
-        }
-
-        const account = departmentAccounts[username];
-
-        if (!account) {
-            alert("Username หรือ Password ไม่ถูกต้อง");
-            return;
-        }
-
-        if (password !== account.password) {
-            alert("Username หรือ Password ไม่ถูกต้อง");
-            return;
-        }
-
-        /*
-         * ล้าง Session เก่าก่อน Login ใหม่
-         */
-        sessionStorage.clear();
-
-        /*
-         * บันทึก Session ให้ตรงกับ auth.js
-         */
-        sessionStorage.setItem("isLoggedIn", "true");
-        sessionStorage.setItem("username", username);
-        sessionStorage.setItem("department", account.department);
-        sessionStorage.setItem("role", account.role);
-
-        /*
-         * เปลี่ยนหน้าแยกตามสิทธิ์
-         */
-        if (account.role === "admin") {
-            window.location.href = "pages/dashboard.html";
-        } else {
-            window.location.href = "pages/report.html";
-        }
-    });
-});
+}
+```
